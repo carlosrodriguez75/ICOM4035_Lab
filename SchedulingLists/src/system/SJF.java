@@ -13,8 +13,9 @@ import interfaces.Position;
 
 public class SJF {
 
-	LinkedPositionalList<Job> inputList = new LinkedPositionalList<Job>();
+	private static LinkedPositionalList<Job> inputList = new LinkedPositionalList<Job>();
 	private static LinkedPositionalList<Job> processingList = new LinkedPositionalList<Job>();
+	private static LinkedPositionalList<Job> preProcessingList = new LinkedPositionalList<Job>();
 	private static LinkedPositionalList<Job> terminatedJobs = new LinkedPositionalList<Job>();
 	private static LinkedPositionalList<Job> terminatedJobsAvg = new LinkedPositionalList<Job>();
 	private static LinkedPositionalList<Job> nonCompleted = new LinkedPositionalList<Job>();
@@ -25,6 +26,7 @@ public class SJF {
 
 	public static int time = 0;
 	private static int arrival, pid, burst, patience ;
+	private static int counterPatience = 0;
 	private static String cost;
 
 	private static int currentArrival = 0;
@@ -41,32 +43,25 @@ public class SJF {
 	}
 
 	public static void processSJF(LinkedPositionalList<Job> inputList) throws IllegalStateEXception{
-		while(!inputList.isEmpty() || !processingList.isEmpty()){
-			if(!processingList.isEmpty()){
-				processingList.addFirst(processingList.remove(checkBurst(processingList.first())));
-				//System.out.println(processingList.first().getElement().getBurst());
-				//System.out.println(processingList.first().getElement().getArrival());
-				//System.out.println(processingList.first().getElement().getPatience());			
-				processingList.first().getElement().reduceBurst();
-				if( processingList.first().getElement().getBurst() == 0){ // remaining time of job is 0?
-					temp = processingList.remove(processingList.first());
-					temp.setDepartureTime(time);
-					terminatedJobs.addLast(temp);
-					terminatedJobsAvg.addLast(temp);
-					currentArrival = temp.getArrival();
-					if(processingList.size() !=0){
-						while(processingList.size() != 0 && processingList.first().getElement().getPatience()<time ){
-							nonCompleted.addLast(processingList.remove(processingList.first()));
-						}
-					}
-				}
-
+		boolean verify = false;
+		while(!inputList.isEmpty() || !processingList.isEmpty() || !preProcessingList.isEmpty()){
+			while(!preProcessingList.isEmpty()){		
+				checkPatience();
+				checkBurst();
+				processingList.addFirst(preProcessingList.remove(preProcessingList.first()));
+				executeProcessingList();
 			}
 
 			if(!inputList.isEmpty()){
+				if(counterPatience == 0){
+					while(inputList.size() != 0 && time ==  inputList.first().getElement().getArrival()){
+						preProcessingList.addFirst(inputList.remove(inputList.first()));
+					}
+
+				}
 
 				while(inputList.size() != 0 && time ==  inputList.first().getElement().getArrival()){
-						processingList.addFirst(inputList.remove(inputList.first()));
+					preProcessingList.addLast(inputList.remove(inputList.first()));
 				}
 			}			
 			time++;
@@ -74,38 +69,49 @@ public class SJF {
 		}
 	}
 
-	private static Position<Job> checkBurst(Position<Job> first) throws IllegalArgumentException, IllegalStateEXception {
-		Position<Job> temp = processingList.after(processingList.first());
-		int counter1 = 0;
+	private static void checkPatience() throws IllegalStateEXception {
 		int counter = 0;
-		boolean arrivalJob = false;
-		while(counter1 != processingList.size()){
-			counter1++;
-			if(processingList.after(processingList.first()) != null && processingList.first().getElement().getArrival() != currentArrival){
-				processingList.addFirst(processingList.remove(temp));
-				temp = processingList.after(processingList.first());
+		while(counter != inputList.size()){
+			counter++;
+			if(preProcessingList.first().getElement().getPatience()<counterPatience){
+				nonCompleted.addLast(preProcessingList.remove(preProcessingList.first()));
 			}
-			else{
-				temp = processingList.first();
-				arrivalJob = true;
+			else preProcessingList.addLast(preProcessingList.remove(preProcessingList.first()));
+		}
+
+	}
+
+	private static void executeProcessingList() throws IllegalStateEXception {
+		while(!processingList.isEmpty()){
+			counterPatience++;
+			processingList.first().getElement().reduceBurst();
+			if( processingList.first().getElement().getBurst() == 0){ // remaining time of job is 0?
+				temp = processingList.remove(processingList.first());
+				temp.setDepartureTime(counterPatience);
+				terminatedJobs.addLast(temp);
+				terminatedJobsAvg.addLast(temp);
+				currentArrival = temp.getArrival();
 			}
 		}
-		if(processingList.after(processingList.first()) != null && arrivalJob == false) {
-			while(counter != processingList.size()){
+
+	}
+
+
+	private static  void checkBurst() throws IllegalArgumentException, IllegalStateEXception {
+		Position<Job> temp = preProcessingList.after(preProcessingList.first());
+		int counter = 0;
+		if(temp  != null) {
+			while(counter != preProcessingList.size()){
 				counter++;
-				if(processingList.first().getElement().getBurst() > temp.getElement().getBurst()){
-					processingList.addFirst(processingList.remove(temp));
-					temp = processingList.after(processingList.first());
+				if(preProcessingList.first().getElement().getBurst() > temp.getElement().getBurst()){
+					preProcessingList.addFirst(preProcessingList.remove(temp));
+					temp = preProcessingList.after(preProcessingList.first());
 				}
 
-				processingList.addLast(processingList.remove(temp));
-				temp = processingList.after(processingList.first());
-			}
-			return processingList.first();
+				preProcessingList.addLast(preProcessingList.remove(temp));
+				temp = preProcessingList.after(preProcessingList.first());
+			}		
 		}
-		
-		return temp;
-
 	}
 
 	public static void fileData(String input, LinkedPositionalList<Job> inputList ) throws FileNotFoundException{

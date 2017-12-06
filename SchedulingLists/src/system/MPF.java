@@ -10,7 +10,7 @@ import interfaces.Position;
 
 public class MPF {
 
-	LinkedPositionalList<Job> inputList = new LinkedPositionalList<Job>();
+	private static LinkedPositionalList<Job> inputList = new LinkedPositionalList<Job>();
 	private static LinkedPositionalList<Job> processingList = new LinkedPositionalList<Job>();
 	private static LinkedPositionalList<Job> terminatedJobs = new LinkedPositionalList<Job>();
 	private static LinkedPositionalList<Job> terminatedJobsAvg = new LinkedPositionalList<Job>();
@@ -22,7 +22,9 @@ public class MPF {
 
 	public static int time = 0;
 	private static int arrival, pid, burst, patience ;
+	private static int counterPatience = 0;
 	private static String cost;
+
 
 	private static int currentArrival = 0;
 
@@ -36,86 +38,99 @@ public class MPF {
 		this.nonCompleted = nonCompleted;
 
 	}
-	
+
 	public static void processMPF(LinkedPositionalList<Job> inputList) throws IllegalStateEXception{
+
 		while(!inputList.isEmpty() || !processingList.isEmpty()){
-			if(!processingList.isEmpty()){
-				processingList.addFirst(processingList.remove(checkCost(processingList.first())));
-				System.out.println(processingList.first().getElement().getBurst() + " Burst");
-				System.out.println(processingList.first().getElement().getArrival() + " Arrival");
-				System.out.println(processingList.first().getElement().getPatience() + " Patience");			
-				processingList.first().getElement().reduceBurst();
-				if( processingList.first().getElement().getBurst() == 0){ // remaining time of job is 0?
-					temp = processingList.remove(processingList.first());
-					temp.setDepartureTime(time);
-					terminatedJobs.addLast(temp);
-					terminatedJobsAvg.addLast(temp);
-					currentArrival = temp.getArrival();
-//					if(processingList.size() !=0){
-//						while(processingList.size() != 0 && processingList.first().getElement().getPatience()<time ){
-//							nonCompleted.addLast(processingList.remove(processingList.first()));
-//						}
-//					}
-				}
+			while(!processingList.isEmpty()){
+				executeProcessingList();
 
 			}
 
 			if(!inputList.isEmpty()){
+				if(counterPatience == 0){
+					while(inputList.size() != 0 && time ==  inputList.first().getElement().getArrival()){
+						processingList.addFirst(inputList.remove(inputList.first()));
+					}
+
+				}
 
 				while(inputList.size() != 0 && time ==  inputList.first().getElement().getArrival()){
-						processingList.addFirst(inputList.remove(inputList.first()));
+					executeProcessingList();
+					checkPatience();
+					checkCost();
+					processingList.addFirst(inputList.remove(inputList.first()));
 				}
 			}			
 			time++;
 
 		}
 	}
-	
-	private static Position<Job> checkCost(Position<Job> first) throws IllegalArgumentException, IllegalStateEXception{
-		//Position<Job> temp = processingList.after(processingList.first());
-		int counter = 0;
-		int counterPatience = 0;
-		while(counterPatience != processingList.size()){
+	private static void executeProcessingList() throws IllegalStateEXception {
+		while(!processingList.isEmpty()){
 			counterPatience++;
-			processingList.first().getElement().setPatience(1);
-			if(processingList.first().getElement().getPatience()<=0){
-				nonCompleted.addLast(processingList.remove(processingList.first()));
+			processingList.first().getElement().reduceBurst();
+			if( processingList.first().getElement().getBurst() == 0){ // remaining time of job is 0?
+				temp = processingList.remove(processingList.first());
+				temp.setDepartureTime(counterPatience);
+				terminatedJobs.addLast(temp);
+				terminatedJobsAvg.addLast(temp);
+				currentArrival = temp.getArrival();
 			}
-			processingList.addLast(processingList.remove(processingList.first()));
-			
 		}
 		
-		Position<Job> temp = processingList.after(processingList.first());
-		if(temp != null){
-			while(counter != processingList.size()){
-				counter++;
-				String currentCost = processingList.first().getElement().getCost();
-				String compareCost = temp.getElement().getCost();
-				currentCost = currentCost.replace("$", "");
-				compareCost = compareCost.replace("$","");
-				
-				if(Double.parseDouble(compareCost) > Double.parseDouble(currentCost) ){
-					processingList.addFirst(processingList.remove(temp));
-					temp = processingList.after(processingList.first());
-				}
-				
-				else if(Double.parseDouble(compareCost) == Double.parseDouble(currentCost)){
-					if(processingList.first().getElement().getArrival()>temp.getElement().getArrival()){
-						processingList.addLast(processingList.remove(temp));
-						temp = processingList.after(processingList.first());
-					}
-					processingList.addFirst(processingList.remove(temp));
-					temp = processingList.after(processingList.first());
-					
-				}
-				processingList.addLast(processingList.remove(temp));
-				temp = processingList.after(processingList.first());
-			}
-			return processingList.first();
-		}
-		 return processingList.first();
 	}
-	
+
+	private static void checkPatience() throws IllegalStateEXception {
+		int counter = 0;
+		while(counter != inputList.size()){
+			counter++;
+			if(inputList.first().getElement().getPatience()<counterPatience){
+				nonCompleted.addLast(inputList.remove(inputList.first()));
+			}
+			else inputList.addLast(inputList.remove(inputList.first()));
+		}
+
+	}
+	private static void checkCost() throws IllegalStateEXception {
+		int counter = 0;
+		Position<Job> temp = inputList.after(inputList.first());
+		while(temp != null && counter != inputList.size()){
+			counter++;
+			String currentCost = inputList.first().getElement().getCost();
+			String compareCost = temp.getElement().getCost();
+			currentCost = currentCost.replace("$", "");
+			compareCost = compareCost.replace("$","");
+
+			if(Double.parseDouble(compareCost) > Double.parseDouble(currentCost) ){
+				if(temp.getElement().getArrival() == time){
+				inputList.addFirst(inputList.remove(temp));
+				temp = inputList.after(inputList.first());
+				}
+				temp = inputList.after(inputList.after(inputList.first()));
+			}
+
+			else if(Double.parseDouble(compareCost) == Double.parseDouble(currentCost)){
+				if(inputList.first().getElement().getArrival()>temp.getElement().getArrival()){
+					inputList.addLast(inputList.remove(temp));
+					temp = inputList.after(inputList.first());	
+				}
+
+				else
+					inputList.addFirst(inputList.remove(temp));
+				temp = inputList.after(inputList.first());
+			}
+
+			else{ 
+				inputList.addLast(inputList.remove(temp));
+				temp = inputList.after(inputList.first());
+
+			}
+		}
+
+	}
+
+
 	public static void fileData(String input, LinkedPositionalList<Job> inputList ) throws FileNotFoundException{
 
 		@SuppressWarnings("resource")

@@ -83,7 +83,7 @@ public class theSystem {
 		System.out.println("Pac’s approach number of disappointed customers: " + SJF.nonCompleted(nonCompletedSJF) );//DISSAPOINTED CUSTOMERS
 		System.out.println("Average Time in Max's approach: " + SJF.retAvgTime(terminatedJobsAvgSJF) );	//AVERAGE TIME
 		
-		
+		//System.out.printf(format, args)
 	}
 	
 
