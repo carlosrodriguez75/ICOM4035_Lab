@@ -1,0 +1,10 @@
+Maximum profit possible: 111.3
+Maximum number of customers served possible: 2
+Pat’s approach profit: 70.4
+Pat’s approach number of disappointed customers: 1
+Mat’s approach profit: 70.4
+Mat’s approach number of disappointed customers: 1
+Max’s approach profit: 70.4
+Max’s approach number of disappointed customers: 1
+Pac’s approach profit: 70.4
+Pac’s approach number of disappointed customers: 1
