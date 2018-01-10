@@ -22,7 +22,7 @@ public class LinkedTree<E> extends AbstractTree<E> {
 	private Node<E> root; 
 	private int size; 
 	boolean flag = false;
-	 ArrayList<E> arrestsList = new ArrayList<E>();
+	ArrayList<E> arrestsList = new ArrayList<E>();
 	int arrests = 0,optionA,optionB;
 
 	public LinkedTree() { 

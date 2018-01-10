@@ -9,8 +9,7 @@ public class Member {
 	
 	private int asset;
 	private String name, sponsor, mentor;
-	private ArrayList<Member> childrens;
-	
+
 	public Member(String name, int asset, String sponsor){
 		this.asset = asset;
 		this.name = name;

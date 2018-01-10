@@ -95,7 +95,7 @@ public class PQCase {
 					numberAssets = tmpNumberAssets;
 					arrestsResult.clear();
 					for(int pointer =0; pointer<tmpArrestsList.size();pointer++){
-						arrestsResult.add(tmpArrestsList.get(i));
+						arrestsResult.add(tmpArrestsList.get(pointer));
 					}
 					
 				}
@@ -107,6 +107,7 @@ public class PQCase {
 			}
 
 		}
+		
 		return arrestsResult;
 
 	}
