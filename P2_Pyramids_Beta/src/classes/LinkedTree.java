@@ -213,6 +213,9 @@ public class LinkedTree<E> extends AbstractTree<E> {
 		arrests--;
 		while(arrests != 0){
 			Node<E> arrested = arrestOne(this,pointer);
+			if(arrested == null){
+				arrests = 0;
+				return arrestsList;}
 			arrestsList.add(arrested.getElement());		
 			arrests--;
 			pointer = searchInTree(arrested,this,this.root);
@@ -238,17 +241,17 @@ public class LinkedTree<E> extends AbstractTree<E> {
 
 		}
 		if(parentNode != null){
-			//tmp.addChild(pointer,parentNode.getElement());
 			tmp.addChild(((Member) pointer.getElement()).getName(), parentNode.getElement(), tmp);
 		}
 
 		if(mentor != null){
-			//tmp.addChild(pointer,mentor.getElement());
 			tmp.addChild(((Member) pointer.getElement()).getName(), mentor.getElement(), tmp);
 		}
 
-		ArrayList<Node<E>> tmpList = tmp.root.getChildren(); //(ArrayList<Node<E>>) tmp.children(tmp.root);
-
+		ArrayList<Node<E>> tmpList = tmp.root.getChildren();
+		ArrayList<Node<E>> temp2List = (ArrayList<Node<E>>) tmpList.clone();
+		
+		
 		return arrestNode(tmpList,linkedTree);
 
 	}
@@ -263,7 +266,7 @@ public class LinkedTree<E> extends AbstractTree<E> {
 		Node<E> arrestNode = new Node<E>(null,null,null,null);
 		Node<E> currentNode = new Node<E>(null,null,null,null);
 		for(int i = 0; i< tmpList.size(); i++){	
-			if(maxAsset<((Member) tmpList.get(i).getElement()).getAsset()){
+			if(maxAsset<((Member) tmpList.get(i).getElement()).getAsset() || maxAsset==0){
 				maxAsset = ((Member) tmpList.get(i).getElement()).getAsset();
 				arrestNode = tmpList.get(i);
 				currentNode = arrestNode;
@@ -303,7 +306,10 @@ public class LinkedTree<E> extends AbstractTree<E> {
 		for(int i = 0; i<arrestsList.size();i++){
 			if(arrestsList.get(i).equals(arrestNode.getElement())){
 				tmpList.remove(arrestNode);
+				if(tmpList.size()>0){
 				return arrestNode(tmpList,linkedTree);
+				}
+				return null;
 			}
 		}
 
@@ -313,16 +319,22 @@ public class LinkedTree<E> extends AbstractTree<E> {
 				return arrestNode;
 			}
 			tmpList.remove(arrestNode);
-			return arrestNode(tmpList,linkedTree);
+			if(tmpList.size()>0){
+				return arrestNode(tmpList,linkedTree);
+			}
+			return null;
 		}
 		return arrestNode;
 	}
 
 	private Node<E> searchInTree(Node<E> target, LinkedTree<E> linkedTree,Node<E> index) {
+		if(target.getElement()!=null){
+			if(((Member) target.getElement()).getName().equals(((Member) root.getElement()).getName())){
+				return linkedTree.root;
+			}
+		
+		
 
-		if(((Member) target.getElement()).getName().equals(((Member) root.getElement()).getName())){
-			return linkedTree.root;
-		}
 		if(isInternal(index)){
 			ArrayList<Node<E>> nuevo = (ArrayList<Node<E>>) linkedTree.children(index) ;
 			for (int counter = 0; counter < nuevo.size(); counter++) { 
@@ -333,37 +345,15 @@ public class LinkedTree<E> extends AbstractTree<E> {
 			for(int i = 0; i<nuevo.size();i++){
 				Node<E> tmp = searchInTree(target,linkedTree,nuevo.get(i));
 
-				//			if(((Member) target.getElement()).getName().equals(((Member) tmp.getElement()).getName())){
-				//				return tmp;
-				//			}
 				if(tmp!=null){
 					return tmp;
 				}
 			}
 		}
-		//		private Node<E> searchChild(LinkedTree<E> testingCase, String parent,Node<E> index) {
-		//			if(testingCase.root() == null){return null;}
-		//			if(isInternal(index)){
-		//				ArrayList<Node<E>> nuevo = (ArrayList<Node<E>>) testingCase.children(index) ;
-		//				for (int counter = 0; counter < nuevo.size(); counter++) { 
-		//					if(parent.equals(((Member) nuevo.get(counter).getElement()).getName())){
-		//						return nuevo.get(counter);
-		//					}    
-		//				}
-		//
-		//				for(int i = 0; i< nuevo.size();i++){
-		//					Node<E> tmp = searchChild(testingCase,parent,nuevo.get(i));	
-		//					if(tmp!= null){
-		//						return tmp;
-		//					}
-		//				}
-		//			}
-		//
-		//			return null;
-		//
-		//		}
-
+		
+		return null;}
 		return null;
+		
 	}
 
 

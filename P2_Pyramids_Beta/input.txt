@@ -1,1 +1,2 @@
 4 log.txt
+12 logX1.txt

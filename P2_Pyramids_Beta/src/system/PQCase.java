@@ -120,10 +120,11 @@ public class PQCase {
 		//ArrayList<Node<Member>> targets = (ArrayList<Node<Member>>) testingCase.children(testingCase.root());
 		for(int i =0; i<targetZeros-1; i++){
 			if(testingCase.children(targets.get(i)) != null){
-				//targets.add((Node<Member>) testingCase.children(targets.get(i)));
+				//System.out.println(targets.get(i).getElement().getName());
 				result = testingCase.children(targets.get(i));
 				Iterator<Node<Member>> memberIterator = result.iterator();
 				while(memberIterator.hasNext()){
+					
 					targets.add(memberIterator.next());
 				}
 				
